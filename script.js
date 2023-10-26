@@ -2,11 +2,24 @@ const Board = [800, 500];
 const Sprites = {
     cards: [[], [], [], []],
 };
+const CARD_WIDTH = 68;
+const CARD_HEIGHT = 100;
+const FRAME_RATE = 60;
 const GameProperties = {};
 const GameObjects = [];
+const tableAnimation = animS.newAnimS(p5);
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 function renderGameObject(zIndex = true) {
-    let neeGameObjects = zIndex ? _.sortBy(GameObjects, ["zIndex"]) : GameObjects;
-    neeGameObjects.forEach((e) => {
+    let newGameObjects = zIndex ? _.sortBy(GameObjects, ["zIndex"]) : GameObjects;
+    newGameObjects.forEach((e) => {
+        e?.render?.();
+    });
+}
+function renderGameProperties(zIndex = false) {
+    let newGameProperties = zIndex ? _.sortBy(GameProperties, ["zIndex"]) : GameProperties;
+    _.forEach(newGameProperties, (e) => {
         e?.render?.();
     });
 }
@@ -14,6 +27,23 @@ function renderGameInfo() {
     if (frameCount && frameCount % 10 == 0) {
         document.querySelector(".frame").textContent = `FPS : ${round(frameRate())}`;
     }
+}
+function renderTable() {
+    push();
+    strokeWeight(2);
+    stroke(100);
+    noFill();
+    animS.rect("r1", FRAME_RATE * 0.5, 50, 50, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r2", FRAME_RATE * 0.55, 50 + CARD_WIDTH * 1.5, 50, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r3", FRAME_RATE * 0.6, 50 + CARD_WIDTH * 1.5 * 2, 50, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r4", FRAME_RATE * 0.65, 50 + CARD_WIDTH * 1.5 * 3, 50, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r5", FRAME_RATE * 0.7, 50 + CARD_WIDTH * 1.5 * 4, 50, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r6", FRAME_RATE * 0.5, 50, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r7", FRAME_RATE * 0.55, 50 + CARD_WIDTH * 1.5, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r8", FRAME_RATE * 0.6, 50 + CARD_WIDTH * 1.5 * 2, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r9", FRAME_RATE * 0.65, 50 + CARD_WIDTH * 1.5 * 3, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
+    animS.rect("r10", FRAME_RATE * 0.7, 50 + CARD_WIDTH * 1.5 * 4, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
+    pop();
 }
 function preload() {
     GameProperties.cardsPile = new CardsPile();
@@ -23,10 +53,12 @@ function preload() {
             Sprites["cards"][i].push(loadImage(`/assets/${x}.${i + 1}.png`, undefined, () => alert("error")));
         }
     }
+    let backSideSkin = _.random(1, 8, false);
+    Sprites["backside"] = loadImage(`/assets/backside/Back${backSideSkin}.png`, undefined, () => alert("error"));
 }
 
 function setup() {
-    frameRate(60);
+    frameRate(FRAME_RATE);
     createCanvas(...Board);
     GameObjects.push(new Cards(2, 0, 0, 0, 10));
     GameObjects.push(new Cards(14, 2, 50, 0, 100));
@@ -34,7 +66,9 @@ function setup() {
 
 function draw() {
     background(225);
-    renderGameObject();
+    // renderGameObject();
+    // renderGameProperties();
+    renderTable();
     renderGameInfo();
 }
 class GameObject {
@@ -67,6 +101,11 @@ class CardsPile {
     constructor() {
         this.cards = [];
         this.picked = [];
+        this.x = 0;
+        this.y = 0;
+        this.width = CARD_WIDTH;
+        this.height = CARD_HEIGHT;
+        this.piledCards = 6;
     }
     newPile() {
         this.cards = [];
@@ -77,6 +116,11 @@ class CardsPile {
         }
         this.cards = shuffle(_.shuffle(this.cards));
     }
+    render() {
+        for (let i = 0; i < (this.cards.length > this.piledCards ? this.piledCards : this.cards.length); i++) {
+            image(Sprites["backside"], this.x + i * 10, this.y, this.width, this.height);
+        }
+    }
 }
 class Cards extends GameObject {
     constructor(cardNumber = 2, cardType = 0, x = 0, y = 0, zIndex = 1) {
@@ -85,8 +129,8 @@ class Cards extends GameObject {
         super();
         this.ace = cardNumber == 14;
         this.value = this.ace ? [1, 11] : cardNumber < 10 ? cardNumber : 10;
-        this.width = 68;
-        this.height = 100;
+        this.width = CARD_WIDTH;
+        this.height = CARD_HEIGHT;
         this.x = x;
         this.y = y;
         this.zIndex = zIndex;
