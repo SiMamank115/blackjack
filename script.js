@@ -1,3 +1,4 @@
+//* variables
 const Board = [800, 500];
 const Sprites = {
     cards: [[], [], [], []],
@@ -8,7 +9,10 @@ const FRAME_RATE = 60;
 const AnimationTiming = {
     tableCards: {
         frame: 0,
-        increment: 5,
+        increment: _.round(FRAME_RATE / 12),
+    },
+    tableInfo: {
+        frame: _.round(FRAME_RATE * 0.5),
     },
 };
 const GameProperties = {};
@@ -20,6 +24,22 @@ function sleep(ms) {
 }
 //* core function
 function preload() {
+    GameProperties.GUI = {
+        cardPos: [],
+        infoPos: [],
+    };
+    let margin = CARD_WIDTH * 0.5;
+    let midWidth = CARD_WIDTH * 2.75 + margin;
+    for (let i = 0; i < 10; i++) {
+        if (i < 5) {
+            GameProperties.GUI.cardPos.push([50 + (CARD_WIDTH + margin) * i, 50]);
+        } else {
+            GameProperties.GUI.cardPos.push([50 + (CARD_WIDTH + margin) * (i - 5), Board[1] - 50 - CARD_HEIGHT]);
+        }
+    }
+    for (let i = 0; i < 2; i++) {
+        GameProperties.GUI.infoPos.push([50 + (midWidth + margin) * i, 50 + CARD_HEIGHT + 50]);
+    }
     GameProperties.cardsPile = new CardsPile();
     GameProperties.cardsPile.newPile();
     for (let i = 0; i < 4; i++) {
@@ -65,15 +85,23 @@ function renderGameInfo() {
 }
 function renderTable() {
     let tableCards = AnimationTiming.tableCards;
+    let tableInfo = AnimationTiming.tableInfo;
+    let margin = CARD_WIDTH * 0.5;
+    let midWidth = CARD_WIDTH * 2.75 + margin;
     push();
     strokeWeight(2);
-    stroke(150);
+    stroke(180);
     noFill();
     for (let i = 0; i < 10; i++) {
         if (i < 5 && frameCount >= tableCards.frame + tableCards.increment * i) {
-            animS.rect(`r${i + 1}`, FRAME_RATE * 0.3, 50 + CARD_WIDTH * 1.5 * i, 50, CARD_WIDTH, CARD_HEIGHT);
+            animS.rect(`r${i + 1}`, FRAME_RATE * 0.3, GameProperties.GUI.cardPos[i][0],GameProperties.GUI.cardPos[i][1], CARD_WIDTH, CARD_HEIGHT);
         } else if (i >= 5 && frameCount >= tableCards.frame + tableCards.increment * i) {
-            animS.rect(`r${i + 1}`, FRAME_RATE * 0.3, 50 + CARD_WIDTH * 1.5 * (i - 5), Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
+            animS.rect(`r${i + 1}`, FRAME_RATE * 0.3, GameProperties.GUI.cardPos[i][0],GameProperties.GUI.cardPos[i][1], CARD_WIDTH, CARD_HEIGHT);
+        }
+    }
+    for (let i = 0; i < 2; i++) {
+        if (frameCount >= tableInfo.frame + i * 10) {
+            animS.rect(`r${i + 11}`, FRAME_RATE * 0.6, GameProperties.GUI.infoPos[i][0], GameProperties.GUI.infoPos[i][1], midWidth, CARD_HEIGHT);
         }
     }
     pop();
