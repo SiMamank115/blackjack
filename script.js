@@ -5,46 +5,20 @@ const Sprites = {
 const CARD_WIDTH = 68;
 const CARD_HEIGHT = 100;
 const FRAME_RATE = 60;
+const AnimationTiming = {
+    tableCards: {
+        frame: 0,
+        increment: 5,
+    },
+};
 const GameProperties = {};
 const GameObjects = [];
 const tableAnimation = animS.newAnimS(p5);
+//* utility
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
-function renderGameObject(zIndex = true) {
-    let newGameObjects = zIndex ? _.sortBy(GameObjects, ["zIndex"]) : GameObjects;
-    newGameObjects.forEach((e) => {
-        e?.render?.();
-    });
-}
-function renderGameProperties(zIndex = false) {
-    let newGameProperties = zIndex ? _.sortBy(GameProperties, ["zIndex"]) : GameProperties;
-    _.forEach(newGameProperties, (e) => {
-        e?.render?.();
-    });
-}
-function renderGameInfo() {
-    if (frameCount && frameCount % 10 == 0) {
-        document.querySelector(".frame").textContent = `FPS : ${round(frameRate())}`;
-    }
-}
-function renderTable() {
-    push();
-    strokeWeight(2);
-    stroke(100);
-    noFill();
-    animS.rect("r1", FRAME_RATE * 0.5, 50, 50, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r2", FRAME_RATE * 0.55, 50 + CARD_WIDTH * 1.5, 50, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r3", FRAME_RATE * 0.6, 50 + CARD_WIDTH * 1.5 * 2, 50, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r4", FRAME_RATE * 0.65, 50 + CARD_WIDTH * 1.5 * 3, 50, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r5", FRAME_RATE * 0.7, 50 + CARD_WIDTH * 1.5 * 4, 50, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r6", FRAME_RATE * 0.5, 50, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r7", FRAME_RATE * 0.55, 50 + CARD_WIDTH * 1.5, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r8", FRAME_RATE * 0.6, 50 + CARD_WIDTH * 1.5 * 2, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r9", FRAME_RATE * 0.65, 50 + CARD_WIDTH * 1.5 * 3, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
-    animS.rect("r10", FRAME_RATE * 0.7, 50 + CARD_WIDTH * 1.5 * 4, Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
-    pop();
-}
+//* core function
 function preload() {
     GameProperties.cardsPile = new CardsPile();
     GameProperties.cardsPile.newPile();
@@ -71,6 +45,40 @@ function draw() {
     renderTable();
     renderGameInfo();
 }
+//* rendering function
+function renderGameObject(zIndex = true) {
+    let newGameObjects = zIndex ? _.sortBy(GameObjects, ["zIndex"]) : GameObjects;
+    newGameObjects.forEach((e) => {
+        e?.render?.();
+    });
+}
+function renderGameProperties(zIndex = false) {
+    let newGameProperties = zIndex ? _.sortBy(GameProperties, ["zIndex"]) : GameProperties;
+    _.forEach(newGameProperties, (e) => {
+        e?.render?.();
+    });
+}
+function renderGameInfo() {
+    if (frameCount && frameCount % 10 == 0) {
+        document.querySelector(".frame").textContent = `FPS : ${round(frameRate())}`;
+    }
+}
+function renderTable() {
+    let tableCards = AnimationTiming.tableCards;
+    push();
+    strokeWeight(2);
+    stroke(150);
+    noFill();
+    for (let i = 0; i < 10; i++) {
+        if (i < 5 && frameCount >= tableCards.frame + tableCards.increment * i) {
+            animS.rect(`r${i + 1}`, FRAME_RATE * 0.3, 50 + CARD_WIDTH * 1.5 * i, 50, CARD_WIDTH, CARD_HEIGHT);
+        } else if (i >= 5 && frameCount >= tableCards.frame + tableCards.increment * i) {
+            animS.rect(`r${i + 1}`, FRAME_RATE * 0.3, 50 + CARD_WIDTH * 1.5 * (i - 5), Board[1] - 50 - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
+        }
+    }
+    pop();
+}
+//* classes
 class GameObject {
     constructor() {
         this.x = 0;
