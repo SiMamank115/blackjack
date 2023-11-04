@@ -5,6 +5,7 @@ body {
     height: 100vh;
     display: flex;
     align-items: center;
+    user-select: none;
 }
 main {
     padding: 1rem;
@@ -20,6 +21,17 @@ canvas {
     position: fixed;
     left: 0;
     top: 0;
-    font-family: sans-serif;
+    font-family: system-ui;
     padding: 1rem;
+}
+#p5_loading {
+    font-family: system-ui;
+    font-size: 3rem;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
